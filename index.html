@@ -112,7 +112,7 @@
     <noscript>Для добавления и отметки дел включите JavaScript в браузере.</noscript>
   </main>
   <dialog id="editor" aria-labelledby="editor-title">
-    <form id="task-form"><h2 id="editor-title">Новое дело</h2><label for="task-name">Что вы хотите сделать?</label><input id="task-name" name="task" maxlength="100" required autocomplete="off" placeholder="Например, прочитать 10 страниц"><p class="field-note">До 100 символов. Одно дело — один маленький шаг.</p><div class="dialog-actions"><button type="button" id="cancel">Отмена</button><button class="primary" type="submit">Сохранить</button></div></form>
+    <form id="task-form"><h2 id="editor-title">Новое дело</h2><label for="task-name">Что вы хотите сделать?</label><input id="task-name" name="task" maxlength="100" required autocomplete="off" placeholder="Например, прочитать 10 страниц"><p class="field-note">До 100 символов. Одно дело — один маленький шаг.</p><div class="dialog-actions"><button type="button" id="cancel">Отмена</button><button class="primary" type="button" id="save-task">Сохранить дело</button></div></form>
   </dialog>
   <dialog id="confirm" aria-labelledby="confirm-title"><h2 id="confirm-title">Удалить дело?</h2><p id="confirm-text"></p><div class="dialog-actions"><button type="button" id="confirm-cancel">Отмена</button><button class="primary" type="button" id="confirm-ok">Удалить</button></div></dialog>
   <script>
@@ -186,10 +186,16 @@
       $("task-name").value=tasks[index].text;$("task-name").setCustomValidity("");$("editor").showModal();$("task-name").focus();
     }
     $("task-name").addEventListener("input",()=>$("task-name").setCustomValidity(""));
-    $("task-form").addEventListener("submit",event=>{
-      event.preventDefault();const text=$("task-name").value.trim();
+    function saveTask() {
+      const text=$("task-name").value.trim();
       if(!text) { $("task-name").setCustomValidity("Напишите название дела");$("task-name").reportValidity();return; }
+      if(!Number.isInteger(editing) || editing < 0 || editing >= TOTAL) return;
       tasks[editing].text=text;persist();render();$("editor").close();
+    }
+    $("save-task").addEventListener("click",saveTask);
+    $("task-form").addEventListener("submit",event=>{event.preventDefault();saveTask();});
+    $("task-name").addEventListener("keydown",event=>{
+      if(event.key === "Enter" && !event.isComposing) {event.preventDefault();saveTask();}
     });
     $("cancel").addEventListener("click",()=>$("editor").close());
     $("editor").addEventListener("close",()=>focusTask(returnFocus));
