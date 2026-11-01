@@ -53,7 +53,11 @@
     .done { background:var(--ink); color:#fff; border-color:var(--ink); }
     .done .check { background:white; color:var(--ink); border-color:white; }
     .done .name { color:#dedede; }
-    .actions { display:flex; justify-content:flex-end; gap:2px; padding:0 10px 10px; }
+    .actions { display:flex; align-items:center; justify-content:flex-end; gap:2px; padding:0 10px 10px; }
+    .complete-btn { margin-right:auto; min-height:36px; padding:6px 8px; border:1px solid #ccc; border-radius:6px; background:transparent; color:inherit; font-size:11px; }
+    .complete-btn:hover { background:#eee; }
+    .done .complete-btn { border-color:#666; }
+    .done .complete-btn:hover { background:#383838; }
     .icon-btn { width:30px; height:28px; display:grid; place-items:center; border:0; background:transparent; border-radius:5px; color:#888; }
     .icon-btn:hover { background:#eee; color:#151515; }
     .done .icon-btn:hover { background:#383838; color:white; }
@@ -102,7 +106,7 @@
       <div class="progress-bottom"><span id="count">Выполнено 0 из 10</span><span>Одно дело = 10%</span></div>
     </section>
     <section aria-labelledby="tasks-title"><div class="section-head"><h2 id="tasks-title">Мои дела</h2><span>10 клеток · один фокус</span></div><div class="grid" id="tasks"></div></section>
-    <div class="bottom"><p>Нажмите на пустую клетку, чтобы добавить дело.<br>На заполненную — чтобы отметить выполнение.</p><span class="saved" id="save-status" role="status">Сохраняется на устройстве</span></div>
+    <div class="bottom"><p>Нажмите на пустую клетку, чтобы добавить дело.<br>На заполненную клетку или «Завершить» — чтобы отметить выполнение.</p><span class="saved" id="save-status" role="status">Сохраняется на устройстве</span></div>
     <p class="storage-warning" id="storage-warning" role="alert" hidden>Браузер не разрешил сохранить дела. Они будут доступны, пока открыта эта страница.</p>
     <footer class="footer"><span>Свой темп. Свои маленькие победы.</span><span>10 / 10</span></footer>
     <noscript>Для добавления и отметки дел включите JavaScript в браузере.</noscript>
@@ -137,6 +141,13 @@
       catch (_) { $("storage-warning").hidden=false; $("save-status").textContent="Пока только в этой вкладке"; }
     }
     function focusTask(index) { $("tasks").querySelectorAll(".toggle")[index]?.focus(); }
+    function toggleTask(index) {
+      if (!tasks[index].text) return;
+      tasks[index].done = !tasks[index].done;
+      persist();
+      render();
+      focusTask(index);
+    }
     function render() {
       $("tasks").replaceChildren();
       tasks.forEach((task,index) => {
@@ -151,10 +162,14 @@
         const name=document.createElement("span");name.className="name";name.textContent=task.text || "Добавить дело";
         toggle.append(top,name);toggle.addEventListener("click",()=>{
           if(!task.text) { openEditor(index);return; }
-          task.done=!task.done;persist();render();focusTask(index);
+          toggleTask(index);
         });card.append(toggle);
         if(task.text) {
           const actions=document.createElement("div");actions.className="actions";
+          const complete=document.createElement("button");complete.type="button";complete.className="complete-btn";
+          complete.textContent=task.done?"Отменить":"Завершить";
+          complete.setAttribute("aria-label",(task.done?"Отменить выполнение дела ":"Завершить дело ")+(index+1));
+          complete.addEventListener("click",()=>toggleTask(index));actions.append(complete);
           for(const [label,icon,action] of [["Изменить",editIcon,()=>openEditor(index)],["Удалить",deleteIcon,()=>confirmDelete(index)]]) {
             const button=document.createElement("button");button.type="button";button.className="icon-btn";button.innerHTML=icon;
             button.setAttribute("aria-label",label+" дело "+(index+1));button.title=label;button.addEventListener("click",action);actions.append(button);
