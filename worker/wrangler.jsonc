@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ten-tasks-bot",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-01",
+  "vars": { "TIMEZONE": "Europe/Moscow" },
+  "durable_objects": {
+    "bindings": [{ "name": "TRACKER", "class_name": "TrackerStorage" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["TrackerStorage"] }]
+}
