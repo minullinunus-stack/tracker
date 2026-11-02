@@ -11,7 +11,7 @@ if (!url || !/^https:\/\/[a-z0-9.-]+\.workers\.dev\/?$/.test(url)) {
 try {
   const secret = fs.readFileSync(path.join(root, ".webhook-secret"), "utf8").trim();
   const response = await fetch(new URL("/setup", url), {
-    method: "POST", headers: { "X-Setup-Secret": secret }, signal: AbortSignal.timeout(30000),
+    method: "POST", headers: { "X-Setup-Secret": secret, "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(30000),
   });
   const result = await response.json();
   if (!response.ok || !result.ok) { console.error(result.error || "Не удалось настроить вебхук"); process.exitCode = 1; }
